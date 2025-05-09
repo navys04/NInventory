@@ -18,6 +18,7 @@ class NINVENTORY_API UInventoryComponent : public UActorComponent
 public:
 	UInventoryComponent();
 
+#pragma region AddFunctions
 	/**
 	 * Tries to add item to inventory, will stack if possible, important that you should take added object version from inventory after add,
 	 * because if it stacks it deletes original version of object to clean memory
@@ -27,26 +28,54 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	TEnumAsByte<EAddItemResult> TryAddItem(UInventoryObjectBase* InItem, int32 Count = 1);
+#pragma endregion AddFunctions
 
+#pragma region GetFunctions
 	/**
 	 * Takes slot with given index from inventory
 	 * @param InIndex Index to get
 	 * @return Inventory slot from given index, it contains index and pointer to item
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	FInventorySlot GetItemAtIndex(const int32& InIndex);
+	FInventorySlot GetItemAtIndex(int32 InIndex);
+
+	/**
+	 * Takes slot with FIRST ITEM of given id from inventory
+	 * @param InID ID of item to get
+	 * @return Inventory slot with item of given id, it contains index and pointer to item
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	FInventorySlot GetItemByID(const FGuid& InID);
+
+	/**
+	 * Takes slot with FIRST ITEM of given class from inventory
+	 * @param ObjectClass Class of object to get
+	 * @return Inventory slot with item of given class, it contains index and pointer to item
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	FInventorySlot GetItemByClass(TSubclassOf<UInventoryObjectBase> ObjectClass);
+
+	/**
+	 * Takes all inventory slots, it is protected by const keyword, because you don't need to change items like that, using this array
+	 * This is for UX/UI, to display items to player. (idk, you also can create your own pattern, to display IT!)
+	 * @return All inventory slots
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	const TArray<FInventorySlot>& GetSlots() const; 
+#pragma endregion GetFunctions
+	
 	
 private:
 
 #pragma region InternalFunctions
 	/**
 	 * Tries to add item to current stack if we already have this item.
-	 * If it adds to stack it will destroy given item object, so if it will be true, you should take version of this object from inventory, and not use yours
+	 * If it adds to stack overall count it will destroy given item object you should take version of this object from inventory, and not use yours
 	 * @param InItem Item to stack
 	 * @param Count Count to stack
-	 * @return True if item was successfully stacked
+	 * @return Count of added items
 	 */
-	bool TryToAddItemToStack(UInventoryObjectBase* InItem, const int32& Count);
+	int32 TryToAddItemToStack(UInventoryObjectBase* InItem, const int32& Count);
 #pragma endregion InternalFunctions
 	
 #pragma region Settings
