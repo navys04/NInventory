@@ -75,7 +75,7 @@ private:
 	 * @param Count Count to stack
 	 * @return Count of added items
 	 */
-	int32 TryToAddItemToStack(UInventoryObjectBase* InItem, const int32& Count);
+	int32 TryToAddItemToStack(UInventoryObjectBase* InItem, int32& Count);
 #pragma endregion InternalFunctions
 	
 #pragma region Settings

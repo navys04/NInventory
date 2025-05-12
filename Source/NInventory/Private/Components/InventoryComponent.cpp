@@ -3,6 +3,7 @@
 
 #include "Components/InventoryComponent.h"
 
+#include "AudioMixerBlueprintLibrary.h"
 #include "Algo/ForEach.h"
 #include "Objects/InventoryObjectBase.h"
 
@@ -29,7 +30,7 @@ TEnumAsByte<EAddItemResult> UInventoryComponent::TryAddItem(UInventoryObjectBase
 	CountToAdd -= AddedCount;
 	while (CountToAdd > InItem->GetMaxStack())
 	{
-		InventorySlots.Add({ InItem, CountToAdd });
+		InventorySlots.Add({ InItem, InItem->GetMaxStack() });
 		CountToAdd -= InItem->GetMaxStack();
 	}
 
@@ -73,18 +74,35 @@ const TArray<FInventorySlot>& UInventoryComponent::GetSlots() const
 	return InventorySlots;
 }
 
-int32 UInventoryComponent::TryToAddItemToStack(UInventoryObjectBase* InItem, const int32& Count)
+int32 UInventoryComponent::TryToAddItemToStack(UInventoryObjectBase* InItem, int32& Count)
 {
 	auto Result = 0;
+	auto CopiedCount = Count; // need to rewrite all code to pass this through reference, because this code is stupid
 	
 	for (auto& Slot : InventorySlots)
 	{
-		const auto CountToAdd = Slot.Object->GetMaxStack() - Slot.Count + Count;
-		if (InItem->GetItemID() == Slot.Object->GetItemID() && CountToAdd > 0)
+		if (InItem->GetItemID() == Slot.Object->GetItemID() || Slot.Count < InItem->GetMaxStack())
 		{
-			Slot.Count += CountToAdd;
-			if (CountToAdd == Count) InItem->BeginDestroy(); // We destroy original item object, to clean up memory, because we don't need it after this procedure
-			Result += CountToAdd;
+			auto CountToAdd = Slot.Count + Count - Slot.Count;
+			if (CountToAdd > 0)
+			{
+				if (Slot.Count + CountToAdd > InItem->GetMaxStack())
+				{
+					auto ValueToRemove = InItem->GetMaxStack() - Slot.Count;
+					Slot.Count = InItem->GetMaxStack();
+					Result += ValueToRemove;
+					CopiedCount -= ValueToRemove;
+				}
+
+				else
+				{
+					Slot.Count += CountToAdd;
+					Result += CountToAdd;
+					CopiedCount -= CountToAdd;
+
+					//InItem->BeginDestroy();
+				}
+			}
 		}
 	}
 
