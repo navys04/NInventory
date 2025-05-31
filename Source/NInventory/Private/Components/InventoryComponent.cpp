@@ -5,6 +5,7 @@
 
 #include "AudioMixerBlueprintLibrary.h"
 #include "Algo/ForEach.h"
+#include "Objects/ActionInventoryObject.h"
 #include "Objects/InventoryObjectBase.h"
 
 UInventoryComponent::UInventoryComponent()
@@ -72,6 +73,19 @@ FInventorySlot UInventoryComponent::GetItemByClass(const TSubclassOf<UInventoryO
 const TArray<FInventorySlot>& UInventoryComponent::GetSlots() const
 {
 	return InventorySlots;
+}
+
+bool UInventoryComponent::TryToCallAction(const int32& ItemIndex, const TEnumAsByte<EItemAction>& ItemAction)
+{
+	if (!InventorySlots.IsValidIndex(ItemIndex)) return false;
+	if (!InventorySlots[ItemIndex].IsSlotValid()) return false;
+	
+	if (UActionInventoryObject* ActionInventoryObject = Cast<UActionInventoryObject>(InventorySlots[ItemIndex].Object))
+	{
+		return ActionInventoryObject->TryToCallAction(ItemAction, GetOwner());
+	}
+
+	return false;
 }
 
 int32 UInventoryComponent::TryToAddItemToStack(UInventoryObjectBase* InItem, int32& Count)

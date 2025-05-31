@@ -26,10 +26,18 @@ struct FInventorySlot
 
 	/**
 	 * Current count of item in slot.
-	 * If it is greater than object's max stack, you doing something wrong
+	 * If it is greater than object's max stack, you're doing something wrong
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
 	int32 Count;
+
+	/**
+	 * Is valid then object inside slot is valid and count is greater than zero
+	 */
+	bool IsSlotValid() const
+	{
+		return Object != nullptr && Count > 0;
+	}
 };
 
 /**
@@ -71,4 +79,14 @@ enum EAddItemResult : uint8
 	EADIR_Success = 0		UMETA(DisplayName = "Success"), // We successfully added item without any problems
 	EADIR_NoSpace = 1		UMETA(DisplayName = "No Space"), // We cannot provide new cell for item, or add it to current item's stack
 	EADIR_Failure = 2		UMETA(DisplayName = "Failure"), // Error, that is not written here, for example: given item object is not valid
+};
+
+/**
+ * Global item action array, you should add here new actions if you want \n
+ * Used this way, because I don't want to work with strings, this type of actions will be easier to debug, and localize for different languages
+ */
+UENUM(BlueprintType)
+enum EItemAction : uint8
+{
+	EIA_Use = 0				UMETA(DisplayName = "Use")
 };

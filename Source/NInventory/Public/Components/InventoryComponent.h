@@ -63,6 +63,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	const TArray<FInventorySlot>& GetSlots() const; 
 #pragma endregion GetFunctions
+
+#pragma region Item Workflow Functions
+	/**
+	 * Tries to call action on given item. \n
+	 * It will work if item can handle actions and this action exists in it. By default, instigator for action is owner of this component.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	bool TryToCallAction(const int32& ItemIndex, const TEnumAsByte<EItemAction>& ItemAction);
+#pragma endregion Item Workflow Functions
 	
 	
 private:
